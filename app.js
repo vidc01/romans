@@ -104,6 +104,26 @@
   }
 
   // ============================================================
+  //  MODALE MENTIONS LÉGALES
+  // ============================================================
+  var legalOverlay = document.getElementById('legalOverlay');
+  var legalClose = document.getElementById('legalClose');
+  var legalLastFocused = null;
+
+  function openLegal() {
+    legalOverlay.classList.add('is-active');
+    legalOverlay.setAttribute('aria-hidden', 'false');
+    legalLastFocused = document.activeElement;
+    legalClose.focus();
+  }
+
+  function closeLegal() {
+    legalOverlay.classList.remove('is-active');
+    legalOverlay.setAttribute('aria-hidden', 'true');
+    if (legalLastFocused && typeof legalLastFocused.focus === 'function') legalLastFocused.focus();
+  }
+
+  // ============================================================
   //  ÉCOUTEURS — délégation, zéro attribut onclick dans le HTML
   // ============================================================
   document.addEventListener('click', function (e) {
@@ -114,15 +134,21 @@
     // Couverture cliquable
     if (e.target.closest('[data-action="open-book"]')) { goToStep(1); return; }
 
-    // Clic sur le fond sombre de la modale = fermeture
+    // Ouverture des mentions légales
+    if (e.target.closest('[data-action="open-legal"]')) { e.preventDefault(); openLegal(); return; }
+
+    // Clic sur le fond sombre de la modale synopsis = fermeture
     if (e.target === overlay) { closeSynopsis(); return; }
+
+    // Clic sur le fond sombre de la modale légale = fermeture
+    if (e.target === legalOverlay) { closeLegal(); return; }
   });
 
   // Couverture : Entrée / Espace déclenchent l'ouverture (accessibilité clavier)
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && overlay.classList.contains('is-active')) {
-      closeSynopsis();
-      return;
+    if (e.key === 'Escape') {
+      if (overlay.classList.contains('is-active')) { closeSynopsis(); return; }
+      if (legalOverlay.classList.contains('is-active')) { closeLegal(); return; }
     }
     var target = e.target.closest && e.target.closest('[data-action="open-book"]');
     if (target && (e.key === 'Enter' || e.key === ' ')) {
@@ -134,12 +160,21 @@
   document.getElementById('btnPrev').addEventListener('click', prevPage);
   document.getElementById('btnNext').addEventListener('click', nextPage);
   closeBtn.addEventListener('click', closeSynopsis);
+  legalClose.addEventListener('click', closeLegal);
 
-  // Piège à focus basique à l'intérieur de la modale (Tab / Maj+Tab)
+  // Piège à focus basique à l'intérieur de la modale synopsis (Tab / Maj+Tab)
   overlay.addEventListener('keydown', function (e) {
     if (e.key !== 'Tab') return;
     if (e.shiftKey && document.activeElement === closeBtn) {
       e.preventDefault(); closeBtn.focus();
+    }
+  });
+
+  // Piège à focus basique à l'intérieur de la modale légale (Tab / Maj+Tab)
+  legalOverlay.addEventListener('keydown', function (e) {
+    if (e.key !== 'Tab') return;
+    if (e.shiftKey && document.activeElement === legalClose) {
+      e.preventDefault(); legalClose.focus();
     }
   });
 

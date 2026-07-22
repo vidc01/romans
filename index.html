@@ -317,12 +317,8 @@
     .image-page { padding: 0; height: 100%; }
     .site-footer__inner { justify-content: center; text-align: center; }
     .controls { display: none; }
+    .marquee-banner { display: none; }
   }
-  @media (max-width: 768px) {
-  
-  .controls { display: none; }
-  .marquee-banner { display: none; }   /* ← ajout */
-}
 </style>
 </head>
 <body>
@@ -491,13 +487,31 @@
   </div>
 </div>
 
+<!-- MODALE MENTIONS LÉGALES -->
+<div class="synopsis-overlay" id="legalOverlay" aria-hidden="true">
+  <div class="synopsis-card" role="dialog" aria-modal="true" aria-labelledby="legalTitle">
+    <button type="button" class="synopsis-card__close" id="legalClose" aria-label="Fermer les mentions légales">✕</button>
+    <div class="synopsis-card__eyebrow">Informations légales</div>
+    <h3 class="synopsis-card__title" id="legalTitle">Mentions légales</h3>
+    <p class="synopsis-card__text">
+      <strong>Éditeur du site</strong><br>
+      Lionel Daucourt<br><br>
+      <strong>Hébergement</strong><br>
+      GitHub, Inc.<br>
+      88 Colin P Kelly Jr Street<br>
+      San Francisco, CA 94107, États-Unis<br>
+      <a href="https://github.com" class="buy-link" rel="noopener" target="_blank">github.com</a>
+    </p>
+  </div>
+</div>
+
 <footer class="site-footer">
   <div class="site-footer__inner">
     <span class="site-footer__brand">Lionel Daucourt</span>
     <nav class="site-footer__links">
       <a href="#" rel="noopener">Contact</a>
       <a href="#" rel="noopener">Presse</a>
-      <a href="#" rel="noopener">Mentions légales</a>
+      <a href="#" rel="noopener" data-action="open-legal">Mentions légales</a>
     </nav>
     <span class="site-footer__note">© 2026 — Tous droits réservés</span>
   </div>
