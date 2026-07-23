@@ -505,11 +505,26 @@
   </div>
 </div>
 
+<!-- MODALE CONTACT -->
+<div class="synopsis-overlay" id="contactOverlay" aria-hidden="true">
+  <div class="synopsis-card" role="dialog" aria-modal="true" aria-labelledby="contactTitle">
+    <button type="button" class="synopsis-card__close" id="contactClose" aria-label="Fermer le contact">✕</button>
+    <div class="synopsis-card__eyebrow">Contact</div>
+    <h3 class="synopsis-card__title" id="contactTitle">Me contacter</h3>
+    <p class="synopsis-card__text">
+      <!-- L'adresse e-mail est reconstituée en JS (voir app.js) pour
+           limiter le scraping automatisé par les robots qui parcourent
+           le HTML brut à la recherche de mailto:. -->
+      <a href="#" id="contactEmailLink" class="buy-link" rel="noopener"></a>
+    </p>
+  </div>
+</div>
+
 <footer class="site-footer">
   <div class="site-footer__inner">
     <span class="site-footer__brand">Lionel Daucourt</span>
     <nav class="site-footer__links">
-      <a href="#" rel="noopener">Contact</a>
+      <a href="#" rel="noopener" data-action="open-contact">Contact</a>
       <a href="#" rel="noopener">Presse</a>
       <a href="#" rel="noopener" data-action="open-legal">Mentions légales</a>
     </nav>
