@@ -283,6 +283,12 @@
   .site-footer__links a:hover { color: var(--gold-soft); }
   .site-footer__note { font-size: 11px; letter-spacing: 0.06em; color: var(--text-muted); }
 
+  /* Masquée par défaut (desktop) : la media query mobile ci-dessous
+     la réactive (display:flex) uniquement sous 768px. Cette règle doit
+     rester AVANT la media query : à spécificité égale, la dernière
+     règle du fichier l'emporte, donc l'ordre inverse l'annulerait. */
+  .scroll-hint { display: none; }
+
   /* RESPONSIVE PORTABLE : plus de 3D ni de zoom sur mobile. */
   @media (max-width: 768px) {
     :root { --b-width: 100vw; --b-height: auto; }
@@ -337,14 +343,10 @@
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(6px); }
     }
-    @media (prefers-reduced-motion: reduce) {
-      .scroll-hint__chevron { animation: none; }
-    }
   }
-
-  /* Masquée par défaut (desktop) : n'existe visuellement qu'en mobile,
-     via la media query ci-dessus. */
-  .scroll-hint { display: none; }
+  @media (max-width: 768px) and (prefers-reduced-motion: reduce) {
+    .scroll-hint__chevron { animation: none; }
+  }
 </style>
 </head>
 <body>
