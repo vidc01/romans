@@ -229,5 +229,20 @@
     contactLink.textContent = fullEmail;
   }
 
+  // ============================================================
+  //  INDICATION DE SCROLL (mobile uniquement)
+  //  Petite flèche qui rebondit sur la couverture, invitant à
+  //  glisser vers le bas. Disparaît dès que l'utilisateur scrolle.
+  //  N'a aucun effet sur desktop : l'élément y est display:none en CSS.
+  // ============================================================
+  var scrollHint = document.getElementById('scrollHint');
+  if (scrollHint) {
+    var hideScrollHint = function () {
+      scrollHint.classList.add('is-hidden');
+      container.removeEventListener('scroll', hideScrollHint);
+    };
+    container.addEventListener('scroll', hideScrollHint, { passive: true });
+  }
+
   goToStep(0); // état initial : livre fermé
 })();

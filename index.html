@@ -293,6 +293,7 @@
       -webkit-overflow-scrolling: touch;
     }
     .book-intro {
+      position: relative;
       height: 100svh; margin: 0; padding: 40px 24px;
       display: flex; flex-direction: column; justify-content: center; align-items: center;
       scroll-snap-align: start;
@@ -318,7 +319,32 @@
     .site-footer__inner { justify-content: center; text-align: center; }
     .controls { display: none; }
     .marquee-banner { display: none; }
+
+    /* INDICATION DE SCROLL — visible uniquement sur la couverture,
+       en mobile. Disparaît en JS dès le premier scroll (voir app.js). */
+    .scroll-hint {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      position: absolute; left: 0; right: 0; bottom: 22px;
+      color: var(--gold-soft); pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+    .scroll-hint.is-hidden { opacity: 0; }
+    .scroll-hint__label {
+      font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    .scroll-hint__chevron { animation: scroll-hint-bounce 1.6s ease-in-out infinite; }
+    @keyframes scroll-hint-bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(6px); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .scroll-hint__chevron { animation: none; }
+    }
   }
+
+  /* Masquée par défaut (desktop) : n'existe visuellement qu'en mobile,
+     via la media query ci-dessus. */
+  .scroll-hint { display: none; }
 </style>
 </head>
 <body>
@@ -327,6 +353,13 @@
 
   <div class="book-intro" id="bookIntro">
     <h1>Bienvenue</h1>
+
+    <div class="scroll-hint" id="scrollHint" aria-hidden="true">
+      <span class="scroll-hint__label">Glissez vers le bas</span>
+      <svg class="scroll-hint__chevron" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </div>
   </div>
 
   <div class="book" id="myBook">
