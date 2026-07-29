@@ -215,7 +215,7 @@
 
     setTimeout(function () {
       if (userHasScrolled) return;
-      var NUDGE_DISTANCE = 48;
+      var NUDGE_DISTANCE = 100;
       var previousSnap = container.style.scrollSnapType;
       container.style.scrollSnapType = 'none'; // le snap couperait sinon l'animation en plein vol
       container.scrollTo({ top: NUDGE_DISTANCE, behavior: 'smooth' });
