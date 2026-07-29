@@ -78,105 +78,88 @@
   }
 
   // ============================================================
-  //  MODALE SYNOPSIS
+  //  MODALES (synopsis / mentions légales / contact)
+  //  Les trois modales partagent exactement le même comportement
+  //  (ouverture, fermeture, clic sur le fond, piège à focus). Plutôt
+  //  que de dupliquer cette logique trois fois, une seule factory
+  //  produit un objet { overlay, open, close } pour chacune.
   // ============================================================
-  var overlay = document.getElementById('synopsisOverlay');
-  var titleEl = document.getElementById('synopsisTitle');
-  var textEl = document.getElementById('synopsisText');
-  var closeBtn = document.getElementById('synopsisClose');
-  var lastFocused = null;
+  function createModal(overlayId, closeId) {
+    var overlay = document.getElementById(overlayId);
+    var closeBtn = document.getElementById(closeId);
+    var lastFocused = null;
+
+    function open() {
+      overlay.classList.add('is-active');
+      overlay.setAttribute('aria-hidden', 'false');
+      lastFocused = document.activeElement;
+      closeBtn.focus();
+    }
+
+    function close() {
+      overlay.classList.remove('is-active');
+      overlay.setAttribute('aria-hidden', 'true');
+      if (lastFocused && typeof lastFocused.focus === 'function') lastFocused.focus();
+    }
+
+    // Clic sur le fond sombre = fermeture.
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) close();
+    });
+
+    closeBtn.addEventListener('click', close);
+
+    // Piège à focus basique (Maj+Tab depuis le bouton de fermeture
+    // renvoie dessus, la modale ne contenant qu'un seul élément focusable).
+    overlay.addEventListener('keydown', function (e) {
+      if (e.key !== 'Tab') return;
+      if (e.shiftKey && document.activeElement === closeBtn) {
+        e.preventDefault();
+        closeBtn.focus();
+      }
+    });
+
+    return { overlay: overlay, open: open, close: close };
+  }
+
+  var synopsisModal = createModal('synopsisOverlay', 'synopsisClose');
+  var legalModal = createModal('legalOverlay', 'legalClose');
+  var contactModal = createModal('contactOverlay', 'contactClose');
+
+  var synopsisTitleEl = document.getElementById('synopsisTitle');
+  var synopsisTextEl = document.getElementById('synopsisText');
 
   function openSynopsis(key) {
     var data = SYNOPSIS[key];
     if (!data) return;
-    titleEl.textContent = data.title;
-    textEl.textContent = data.text;
-    overlay.classList.add('is-active');
-    overlay.setAttribute('aria-hidden', 'false');
-    lastFocused = document.activeElement;
-    closeBtn.focus();
+    synopsisTitleEl.textContent = data.title;
+    synopsisTextEl.textContent = data.text;
+    synopsisModal.open();
   }
 
-  function closeSynopsis() {
-    overlay.classList.remove('is-active');
-    overlay.setAttribute('aria-hidden', 'true');
-    if (lastFocused && typeof lastFocused.focus === 'function') lastFocused.focus();
-  }
-
-  // ============================================================
-  //  MODALE MENTIONS LÉGALES
-  // ============================================================
-  var legalOverlay = document.getElementById('legalOverlay');
-  var legalClose = document.getElementById('legalClose');
-  var legalLastFocused = null;
-
-  function openLegal() {
-    legalOverlay.classList.add('is-active');
-    legalOverlay.setAttribute('aria-hidden', 'false');
-    legalLastFocused = document.activeElement;
-    legalClose.focus();
-  }
-
-  function closeLegal() {
-    legalOverlay.classList.remove('is-active');
-    legalOverlay.setAttribute('aria-hidden', 'true');
-    if (legalLastFocused && typeof legalLastFocused.focus === 'function') legalLastFocused.focus();
-  }
-
-  // ============================================================
-  //  MODALE CONTACT
-  // ============================================================
-  var contactOverlay = document.getElementById('contactOverlay');
-  var contactClose = document.getElementById('contactClose');
-  var contactLastFocused = null;
-
-  function openContact() {
-    contactOverlay.classList.add('is-active');
-    contactOverlay.setAttribute('aria-hidden', 'false');
-    contactLastFocused = document.activeElement;
-    contactClose.focus();
-  }
-
-  function closeContact() {
-    contactOverlay.classList.remove('is-active');
-    contactOverlay.setAttribute('aria-hidden', 'true');
-    if (contactLastFocused && typeof contactLastFocused.focus === 'function') contactLastFocused.focus();
+  function isModalOpen(modal) {
+    return modal.overlay.classList.contains('is-active');
   }
 
   // ============================================================
   //  ÉCOUTEURS — délégation, zéro attribut onclick dans le HTML
   // ============================================================
   document.addEventListener('click', function (e) {
-    // Bouton synopsis
     var trigger = e.target.closest('.synopsis-trigger');
     if (trigger) { openSynopsis(trigger.getAttribute('data-synopsis')); return; }
 
-    // Couverture cliquable
     if (e.target.closest('[data-action="open-book"]')) { goToStep(1); return; }
-
-    // Ouverture des mentions légales
-    if (e.target.closest('[data-action="open-legal"]')) { e.preventDefault(); openLegal(); return; }
-
-    // Ouverture du contact
-    if (e.target.closest('[data-action="open-contact"]')) { e.preventDefault(); openContact(); return; }
-
-    // Clic sur le fond sombre de la modale synopsis = fermeture
-    if (e.target === overlay) { closeSynopsis(); return; }
-
-    // Clic sur le fond sombre de la modale légale = fermeture
-    if (e.target === legalOverlay) { closeLegal(); return; }
-
-    // Clic sur le fond sombre de la modale contact = fermeture
-    if (e.target === contactOverlay) { closeContact(); return; }
+    if (e.target.closest('[data-action="open-legal"]')) { e.preventDefault(); legalModal.open(); return; }
+    if (e.target.closest('[data-action="open-contact"]')) { e.preventDefault(); contactModal.open(); return; }
   });
 
-  // Couverture : Entrée / Espace déclenchent l'ouverture (accessibilité clavier)
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
-      if (overlay.classList.contains('is-active')) { closeSynopsis(); return; }
-      if (legalOverlay.classList.contains('is-active')) { closeLegal(); return; }
-      if (contactOverlay.classList.contains('is-active')) { closeContact(); return; }
+      if (isModalOpen(synopsisModal)) { synopsisModal.close(); return; }
+      if (isModalOpen(legalModal)) { legalModal.close(); return; }
+      if (isModalOpen(contactModal)) { contactModal.close(); return; }
     }
+    // Couverture : Entrée / Espace déclenchent l'ouverture (accessibilité clavier)
     var target = e.target.closest && e.target.closest('[data-action="open-book"]');
     if (target && (e.key === 'Enter' || e.key === ' ')) {
       e.preventDefault();
@@ -186,33 +169,6 @@
 
   document.getElementById('btnPrev').addEventListener('click', prevPage);
   document.getElementById('btnNext').addEventListener('click', nextPage);
-  closeBtn.addEventListener('click', closeSynopsis);
-  legalClose.addEventListener('click', closeLegal);
-  contactClose.addEventListener('click', closeContact);
-
-  // Piège à focus basique à l'intérieur de la modale synopsis (Tab / Maj+Tab)
-  overlay.addEventListener('keydown', function (e) {
-    if (e.key !== 'Tab') return;
-    if (e.shiftKey && document.activeElement === closeBtn) {
-      e.preventDefault(); closeBtn.focus();
-    }
-  });
-
-  // Piège à focus basique à l'intérieur de la modale légale (Tab / Maj+Tab)
-  legalOverlay.addEventListener('keydown', function (e) {
-    if (e.key !== 'Tab') return;
-    if (e.shiftKey && document.activeElement === legalClose) {
-      e.preventDefault(); legalClose.focus();
-    }
-  });
-
-  // Piège à focus basique à l'intérieur de la modale contact (Tab / Maj+Tab)
-  contactOverlay.addEventListener('keydown', function (e) {
-    if (e.key !== 'Tab') return;
-    if (e.shiftKey && document.activeElement === contactClose) {
-      e.preventDefault(); contactClose.focus();
-    }
-  });
 
   // ============================================================
   //  ADRESSE E-MAIL RECONSTITUÉE (anti-scraping)
@@ -231,17 +187,45 @@
 
   // ============================================================
   //  INDICATION DE SCROLL (mobile uniquement)
-  //  Petite flèche qui rebondit sur la couverture, invitant à
-  //  glisser vers le bas. Disparaît dès que l'utilisateur scrolle.
-  //  N'a aucun effet sur desktop : l'élément y est display:none en CSS.
+  //  La flèche suit la visibilité de l'écran "Bienvenue" via un
+  //  IntersectionObserver : elle réapparaît chaque fois qu'on y
+  //  revient et disparaît dès qu'on le quitte, dans les deux sens.
+  //  Un nudge (glissement + retour) est joué une fois au chargement
+  //  pour rendre le geste de scroll plus évident qu'une flèche
+  //  statique ; il est annulé si l'utilisateur scrolle avant.
+  //  Sans effet sur desktop : .scroll-hint y est display:none en CSS.
   // ============================================================
   var scrollHint = document.getElementById('scrollHint');
-  if (scrollHint) {
-    var hideScrollHint = function () {
-      scrollHint.classList.add('is-hidden');
-      container.removeEventListener('scroll', hideScrollHint);
-    };
-    container.addEventListener('scroll', hideScrollHint, { passive: true });
+  var bookIntro = document.getElementById('bookIntro');
+  var isMobile = window.matchMedia('(max-width: 768px)').matches;
+
+  if (scrollHint && bookIntro && isMobile) {
+
+    if ('IntersectionObserver' in window) {
+      var hintObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          scrollHint.classList.toggle('is-hidden', !entry.isIntersecting);
+        });
+      }, { root: container, threshold: 0.6 });
+      hintObserver.observe(bookIntro);
+    }
+
+    var userHasScrolled = false;
+    container.addEventListener('scroll', function () { userHasScrolled = true; }, { once: true, passive: true });
+
+    setTimeout(function () {
+      if (userHasScrolled) return;
+      var NUDGE_DISTANCE = 48;
+      var previousSnap = container.style.scrollSnapType;
+      container.style.scrollSnapType = 'none'; // le snap couperait sinon l'animation en plein vol
+      container.scrollTo({ top: NUDGE_DISTANCE, behavior: 'smooth' });
+      setTimeout(function () {
+        container.scrollTo({ top: 0, behavior: 'smooth' });
+        setTimeout(function () {
+          container.style.scrollSnapType = previousSnap;
+        }, 450);
+      }, 420);
+    }, 900);
   }
 
   goToStep(0); // état initial : livre fermé

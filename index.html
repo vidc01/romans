@@ -326,8 +326,13 @@
     .controls { display: none; }
     .marquee-banner { display: none; }
 
+    /* Sur mobile, le nudge de scroll (voir app.js) remplace le bouton
+       "Ouvrir" comme signal d'interaction sur la couverture. */
+    .cover-open-btn { display: none; }
+
     /* INDICATION DE SCROLL — visible uniquement sur la couverture,
-       en mobile. Disparaît en JS dès le premier scroll (voir app.js). */
+       en mobile. Pilotée en JS via IntersectionObserver (voir app.js) :
+       elle réapparaît chaque fois que l'écran "Bienvenue" est visible. */
     .scroll-hint {
       display: flex; flex-direction: column; align-items: center; gap: 6px;
       position: absolute; left: 0; right: 0; bottom: 22px;
@@ -372,7 +377,7 @@
         <span class="eyebrow" style="color:var(--gold);">Romans</span>
         <h2 class="cover-title">Lionel<br>Daucourt</h2>
         <span style="color:var(--gold)">✦</span>
-        <span class="btn" style="pointer-events:none;">Ouvrir</span>
+        <span class="btn cover-open-btn" style="pointer-events:none;">Ouvrir</span>
       </div>
 
       <div class="page-face is-back bg-paper brand-left">
